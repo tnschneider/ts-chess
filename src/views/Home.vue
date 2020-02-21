@@ -1,18 +1,23 @@
 <template>
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <p>{{pString}}</p>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
+import Game from "../models/Game.js";
 export default {
   name: 'Home',
-  components: {
-    HelloWorld
+  data() {
+    return {
+      pString: null
+    }
+  },
+  mounted() {
+    var game = new Game();
+    //this.pString = game.board.print();
+    game.makeAllMoves();
   }
 }
 </script>
