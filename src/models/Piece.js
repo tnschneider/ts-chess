@@ -1,5 +1,6 @@
 import Square from "./Square";
 import { COLORS, opposite } from "./Color";
+import Move from "./Move";
 
 function *range() {
     for (let i = 1; i < 7; i++) {
@@ -60,16 +61,28 @@ export class Pawn extends Piece {
 
     *getValidMoves() {
         var forwardOne = this.getForward(1);
-        if (forwardOne.isValid && !this.board.hasAnyPiece(forwardOne)) { yield forwardOne; }
-        
-        var forwardTwo = this.getForward(2);
-        if (forwardTwo && forwardTwo.isValid && !this.board.hasAnyPiece(forwardTwo)) { yield forwardTwo; }
+        if (forwardOne.isValid && !this.board.hasAnyPiece(forwardOne)) { 
+            yield new Move(this, forwardOne, false);
+
+            var forwardTwo = this.getForward(2);
+            if (forwardTwo && forwardTwo.isValid && !this.board.hasAnyPiece(forwardTwo)) { 
+                yield new Move(this, forwardTwo, false);
+            }
+        }
 
         var takeLeft = this.getTake(true);
-        if (takeLeft && takeLeft.isValid && !this.board.hasFriendlyPiece(takeLeft) && this.board.hasEnemyPiece(takeLeft, this.color)) { yield takeLeft; }
+        if (takeLeft && takeLeft.isValid && !this.board.hasFriendlyPiece(takeLeft, this.color) && this.board.hasEnemyPiece(takeLeft, this.color)) { 
+            yield new Move(this, takeLeft, true);
+        }
 
         var takeRight = this.getTake(false);
-        if (takeRight && takeRight.isValid && !this.board.hasFriendlyPiece(takeRight) && this.board.hasEnemyPiece(takeLeft, this.color)) { yield takeRight; }
+        if (takeRight && takeRight.isValid && !this.board.hasFriendlyPiece(takeRight, this.color) && this.board.hasEnemyPiece(takeRight, this.color)) { 
+            yield new Move(this, takeRight, true);
+        }
+    }
+
+    copy() {
+        return new Pawn(this.board, this.square, this.color);
     }
 }
 export class Knight extends Piece {
@@ -93,9 +106,13 @@ export class Knight extends Piece {
 
         for (let move of allMoves) {
             if (move.isValid && !this.board.hasFriendlyPiece(move, this.color)) {
-                yield move;
+                yield new Move(this, move, true);
             }
         }
+    }
+
+    copy() {
+        return new Knight(this.board, this.square, this.color);
     }
 }
 export class Bishop extends Piece {
@@ -107,8 +124,12 @@ export class Bishop extends Piece {
 
     *getValidMoves() {
         for (let move of generateBishopMoves(this)) {
-            yield move;
+            yield new Move(this, move, true);
         }
+    }
+
+    copy() {
+        return new Bishop(this.board, this.square, this.color);
     }
 }
 export class Rook extends Piece {
@@ -120,8 +141,12 @@ export class Rook extends Piece {
 
     *getValidMoves() {
         for (let move of generateRookMoves(this)) {
-            yield move;
+            yield new Move(this, move, true);
         }
+    }
+
+    copy() {
+        return new Rook(this.board, this.square, this.color);
     }
 }
 export class Queen extends Piece {
@@ -133,11 +158,15 @@ export class Queen extends Piece {
 
     *getValidMoves() {
         for (let move of generateBishopMoves(this)) {
-            yield move;
+            yield new Move(this, move, true);
         }
         for (let move of generateRookMoves(this)) {
-            yield move;
+            yield new Move(this, move, true);
         }
+    }
+
+    copy() {
+        return new Queen(this.board, this.square, this.color);
     }
 }
 export class King extends Piece {
@@ -147,7 +176,7 @@ export class King extends Piece {
 
     get abbrev() { return this.isWhite ? "WK" : "BK" }
 
-    *getValidMoves() {
+    *getValidMoves(exemptKingCheck) {
         var allMoves = [
             new Square(this.square.x + 1, this.square.y + 1),
             new Square(this.square.x + 1, this.square.y),
@@ -161,10 +190,15 @@ export class King extends Piece {
 
         for (let move of allMoves) {
             if (move.isValid && !this.board.hasFriendlyPiece(move, this.color)
-                && this.board.anyCanMoveTo(move, opposite(this.color))) {
-                yield move;
+                && (exemptKingCheck || !this.board.anyCanMoveTo(move, opposite(this.color), true))) {
+                    //TODO: fix problem with this
+                yield new Move(this, move, true);
             }
         }
+    }
+
+    copy() {
+        return new King(this.board, this.square, this.color);
     }
 }
 
@@ -173,42 +207,34 @@ function *generateRookMoves(piece) {
     //up
     for (let i of range()) {
         let move = new Square(piece.square.x, piece.square.y + i);
-        let hasFriendlyPiece = piece.board.hasFriendlyPiece(move, piece.color);
-        if (move.isValid && !hasFriendlyPiece) {
-            yield move;
-        } else {
-            break;
-        }
+        let check = checkMove(piece, move);
+        if (check > 0) { yield move; }
+        if (check < 0) { yield move; break; }
+        if (check == 0) { break; }
     }
     //down
     for (let i of range()) {
         let move = new Square(piece.square.x, piece.square.y - i);
-        let hasFriendlyPiece = piece.board.hasFriendlyPiece(move, piece.color);
-        if (move.isValid && !hasFriendlyPiece) {
-            yield move;
-        } else {
-            break;
-        }
+        let check = checkMove(piece, move);
+        if (check > 0) { yield move; }
+        if (check < 0) { yield move; break; }
+        if (check == 0) { break; }
     }
     //left
     for (let i of range()) {
         let move = new Square(piece.square.x - i, piece.square.y);
-        let hasFriendlyPiece = piece.board.hasFriendlyPiece(move, piece.color);
-        if (move.isValid && !hasFriendlyPiece) {
-            yield move;
-        } else {
-            break;
-        }
+        let check = checkMove(piece, move);
+        if (check > 0) { yield move; }
+        if (check < 0) { yield move; break; }
+        if (check == 0) { break; }
     }
     //right
     for (let i of range()) {
         let move = new Square(piece.square.x + i, piece.square.y);
-        let hasFriendlyPiece = piece.board.hasFriendlyPiece(move, piece.color);
-        if (move.isValid && !hasFriendlyPiece) {
-            yield move;
-        } else {
-            break;
-        }
+        let check = checkMove(piece, move);
+        if (check > 0) { yield move; }
+        if (check < 0) { yield move; break; }
+        if (check == 0) { break; }
     }
 }
 
@@ -216,41 +242,45 @@ function *generateBishopMoves(piece) {
     //up right
     for (let i of range()) {
         let move = new Square(piece.square.x + i, piece.square.y + i);
-        let hasFriendlyPiece = piece.board.hasFriendlyPiece(move, piece.color);
-        if (move.isValid && !hasFriendlyPiece) {
-            yield move;
-        } else {
-            break;
-        }
+        let check = checkMove(piece, move);
+        if (check > 0) { yield move; }
+        if (check < 0) { yield move; break; }
+        if (check == 0) { break; }
     }
     //up left
     for (let i of range()) {
         let move = new Square(piece.square.x - i, piece.square.y + i);
-        let hasFriendlyPiece = piece.board.hasFriendlyPiece(move, piece.color);
-        if (move.isValid && !hasFriendlyPiece) {
-            yield move;
-        } else {
-            break;
-        }
+        let check = checkMove(piece, move);
+        if (check > 0) { yield move; }
+        if (check < 0) { yield move; break; }
+        if (check == 0) { break; }
     }
     //down right
     for (let i of range()) {
         let move = new Square(piece.square.x + i, piece.square.y - i);
-        let hasFriendlyPiece = piece.board.hasFriendlyPiece(move, piece.color);
-        if (move.isValid && !hasFriendlyPiece) {
-            yield move;
-        } else {
-            break;
-        }
+        let check = checkMove(piece, move);
+        if (check > 0) { yield move; }
+        if (check < 0) { yield move; break; }
+        if (check == 0) { break; }
     }
     //down left
     for (let i of range()) {
         let move = new Square(piece.square.x - i, piece.square.y - i);
-        let hasFriendlyPiece = piece.board.hasFriendlyPiece(move, piece.color);
-        if (move.isValid && !hasFriendlyPiece) {
-            yield move;
-        } else {
-            break;
-        }
+        let check = checkMove(piece, move);
+        if (check > 0) { yield move; }
+        if (check < 0) { yield move; break; }
+        if (check == 0) { break; }
+    }
+}
+
+function checkMove(piece, move) {
+    let hasFriendlyPiece = piece.board.hasFriendlyPiece(move, piece.color);
+    let hasEnemyPiece = piece.board.hasEnemyPiece(move, piece.color);
+    if (move.isValid && !hasFriendlyPiece && !hasEnemyPiece) {
+        return 1
+    } else if (move.isValid && hasEnemyPiece) {
+        return -1;
+    } else {
+        return 0;
     }
 }

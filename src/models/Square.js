@@ -10,4 +10,8 @@ export default class Square {
             && this.y >= 0
             && this.y <= 7;
     }
+
+    equals(square) {
+        return this.x === square.x && this.y === square.y;
+    }
 }

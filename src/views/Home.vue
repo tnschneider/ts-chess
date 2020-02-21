@@ -1,23 +1,29 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <p>{{pString}}</p>
+    <Board v-if="board" :game="game"></Board>
   </div>
 </template>
 
 <script>
 import Game from "../models/Game.js";
+import Board from "../components/Board.vue";
 export default {
   name: 'Home',
+  components: {
+    Board
+  },
   data() {
     return {
-      pString: null
+      game: null
+    }
+  },
+  computed: {
+    board() {
+      return (this.game || {}).board;
     }
   },
   mounted() {
-    var game = new Game();
-    //this.pString = game.board.print();
-    game.makeAllMoves();
+    this.game = new Game();
   }
 }
 </script>

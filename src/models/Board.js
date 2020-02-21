@@ -15,9 +15,15 @@ export default class Board {
         return p && p.color === color;
     }
 
-    anyCanMoveTo(square, color) {
-
-        return square || color;
+    anyCanMoveTo(square, color, andCanTake, exemptKingCheck) {
+        for (let piece of this.pieces.filter(x => x.color === color)) {
+            for (let move of piece.getValidMoves(exemptKingCheck)) {
+                if (move.square.equals(square) && (!andCanTake || move.canTake)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     hasAnyPiece(square) {
@@ -27,6 +33,10 @@ export default class Board {
 
     getPieceAt(square) {
         return this.pieces.find(piece => piece.square.x === square.x && piece.square.y === square.y);
+    }
+
+    getPieces(color) {
+        return this.pieces.filter(x => x.color === color);
     }
 
     print() {
@@ -43,5 +53,23 @@ export default class Board {
             str += "-------------------------\n"
         }
         return str;
+    }
+
+    copy() {
+        let pieces = this.pieces.map(x => x.copy());
+        return new Board(pieces);
+    }
+
+    applyMove(move) {
+        var newBoard = this.copy();
+        var piece = newBoard.getPieceAt(move.piece.square);
+        var pieceToTake = newBoard.getPieceAt(move.square);
+        if (pieceToTake) {
+            pieceToTake.square = new Square(-1, -1);
+            pieceToTake.isTaken = true;
+        }
+        piece.square.x = move.square.x;
+        piece.square.y = move.square.y;
+        return newBoard;
     }
 }

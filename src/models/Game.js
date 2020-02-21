@@ -1,10 +1,12 @@
 import Board from "./Board";
 import { Pawn, Bishop, Rook, Queen, King, Knight } from "./Piece";
 import Square from "./Square";
-import { COLORS } from "./Color";
+import { COLORS, opposite } from "./Color";
 
 export default class Game {
     constructor() {
+        this.turnColor = COLORS.WHITE;
+
         this.board = new Board();
         
         let pieces = [
@@ -34,15 +36,24 @@ export default class Game {
         this.board.pieces = pieces;
     }
 
-    makeAllMoves() {
-        for (let piece of this.board.pieces) {
+    makeMove(move) {
+        this.board = this.board.applyMove(move);
+        this.turnColor = opposite(this.turnColor);
+    }
+
+    makeFirstMove() {
+        let madeMove = false;
+        for (let piece of this.board.getPieces(this.turnColor)) {
             for (let move of piece.getValidMoves()) {
-                var curr = piece.square;
-                console.log(piece, piece.square, move);
-                piece.square = move;
-                console.log(this.board.print());
-                piece.square = curr;
+                this.board = this.board.applyMove(move);
+                madeMove = true;
+                break;
             }
+            if (madeMove) break;
         }
+        
+        this.turnColor = opposite(this.turnColor);
+
+        return madeMove;
     }
 }
