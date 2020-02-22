@@ -2,7 +2,7 @@ import Square from "./Square";
 import Color from "./Color";
 import Move from "./Move";
 
-function *range() {
+function *oneToSeven() {
     for (let i = 1; i < 7; i++) {
         yield i;
     }
@@ -207,7 +207,7 @@ export class King extends Piece {
 
 function *generateRookMoves(piece) {
     //up
-    for (let i of range()) {
+    for (let i of oneToSeven()) {
         let move = new Square(piece.square.x, piece.square.y + i);
         let check = checkMove(piece, move);
         if (check > 0) { yield move; }
@@ -215,7 +215,7 @@ function *generateRookMoves(piece) {
         if (check == 0) { break; }
     }
     //down
-    for (let i of range()) {
+    for (let i of oneToSeven()) {
         let move = new Square(piece.square.x, piece.square.y - i);
         let check = checkMove(piece, move);
         if (check > 0) { yield move; }
@@ -223,7 +223,7 @@ function *generateRookMoves(piece) {
         if (check == 0) { break; }
     }
     //left
-    for (let i of range()) {
+    for (let i of oneToSeven()) {
         let move = new Square(piece.square.x - i, piece.square.y);
         let check = checkMove(piece, move);
         if (check > 0) { yield move; }
@@ -231,7 +231,7 @@ function *generateRookMoves(piece) {
         if (check == 0) { break; }
     }
     //right
-    for (let i of range()) {
+    for (let i of oneToSeven()) {
         let move = new Square(piece.square.x + i, piece.square.y);
         let check = checkMove(piece, move);
         if (check > 0) { yield move; }
@@ -242,7 +242,7 @@ function *generateRookMoves(piece) {
 
 function *generateBishopMoves(piece) {
     //up right
-    for (let i of range()) {
+    for (let i of oneToSeven()) {
         let move = new Square(piece.square.x + i, piece.square.y + i);
         let check = checkMove(piece, move);
         if (check > 0) { yield move; }
@@ -250,7 +250,7 @@ function *generateBishopMoves(piece) {
         if (check == 0) { break; }
     }
     //up left
-    for (let i of range()) {
+    for (let i of oneToSeven()) {
         let move = new Square(piece.square.x - i, piece.square.y + i);
         let check = checkMove(piece, move);
         if (check > 0) { yield move; }
@@ -258,7 +258,7 @@ function *generateBishopMoves(piece) {
         if (check == 0) { break; }
     }
     //down right
-    for (let i of range()) {
+    for (let i of oneToSeven()) {
         let move = new Square(piece.square.x + i, piece.square.y - i);
         let check = checkMove(piece, move);
         if (check > 0) { yield move; }
@@ -266,7 +266,7 @@ function *generateBishopMoves(piece) {
         if (check == 0) { break; }
     }
     //down left
-    for (let i of range()) {
+    for (let i of oneToSeven()) {
         let move = new Square(piece.square.x - i, piece.square.y - i);
         let check = checkMove(piece, move);
         if (check > 0) { yield move; }
