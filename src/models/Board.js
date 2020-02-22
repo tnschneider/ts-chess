@@ -1,8 +1,8 @@
 import Square from "./Square";
 
 export default class Board {
-    constructor(pieces) {
-        this.pieces = pieces;
+    constructor() {
+        this.pieces = [];
     }
 
     hasEnemyPiece(square, color) {
@@ -15,14 +15,24 @@ export default class Board {
         return p && p.color === color;
     }
 
-    anyCanMoveTo(square, color, andCanTake, exemptKingCheck) {
-        for (let piece of this.pieces.filter(x => x.color === color)) {
-            for (let move of piece.getValidMoves(exemptKingCheck)) {
-                if (move.square.equals(square) && (!andCanTake || move.canTake)) {
+    anyCanRetake(move, color) {
+        let copyBoard = this.applyMove(move);
+
+        for (let piece of copyBoard.pieces.filter(x => x.color === color && x.name !== "king")) {
+            for (let otherMove of piece.getValidMoves()) {
+                if (otherMove.square.equals(move.square) && otherMove.canTake) {
                     return true;
                 }
             }
         }
+
+        let king = copyBoard.pieces.find(x => x.color === color && x.name === "king");
+        let piece = copyBoard.getPieceAt(move.square);
+
+        if (Math.abs(king.square.x - piece.square.x) <= 1 && Math.abs(king.square.y - piece.square.y) <= 1) {
+            return true;
+        }
+
         return false;
     }
 
@@ -32,7 +42,7 @@ export default class Board {
     }
 
     getPieceAt(square) {
-        return this.pieces.find(piece => piece.square.x === square.x && piece.square.y === square.y);
+        return this.pieces.find(piece => piece.square.equals(square));
     }
 
     getPieces(color) {
@@ -56,8 +66,10 @@ export default class Board {
     }
 
     copy() {
-        let pieces = this.pieces.map(x => x.copy());
-        return new Board(pieces);
+        let board = new Board();
+        let pieces = this.pieces.map(x => x.copy(board));
+        board.pieces = pieces;
+        return board;
     }
 
     applyMove(move) {

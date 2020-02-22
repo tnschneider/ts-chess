@@ -12,6 +12,10 @@ export default class Square {
     }
 
     equals(square) {
-        return this.x === square.x && this.y === square.y;
+        return this.x == square.x && this.y == square.y;
+    }
+
+    copy() {
+        return new Square(this.x, this.y);
     }
 }

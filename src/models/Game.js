@@ -2,10 +2,12 @@ import Board from "./Board";
 import { Pawn, Bishop, Rook, Queen, King, Knight } from "./Piece";
 import Square from "./Square";
 import { COLORS, opposite } from "./Color";
+import Move from "./Move";
 
 export default class Game {
     constructor() {
         this.turnColor = COLORS.WHITE;
+        this.kingMustMove = false;
 
         this.board = new Board();
         
@@ -39,21 +41,12 @@ export default class Game {
     makeMove(move) {
         this.board = this.board.applyMove(move);
         this.turnColor = opposite(this.turnColor);
-    }
-
-    makeFirstMove() {
-        let madeMove = false;
-        for (let piece of this.board.getPieces(this.turnColor)) {
-            for (let move of piece.getValidMoves()) {
-                this.board = this.board.applyMove(move);
-                madeMove = true;
-                break;
-            }
-            if (madeMove) break;
+        let king = this.board.pieces.find(x => x.name == "king" && x.color === this.turnColor);
+        console.log(king);
+        //TODO: this isn't working
+        if (this.board.anyCanRetake(new Move(king, king.square, true), this.turnColor)) {
+            console.log("KING MUST MOVE");
+            this.kingMustMove = true;
         }
-        
-        this.turnColor = opposite(this.turnColor);
-
-        return madeMove;
     }
 }

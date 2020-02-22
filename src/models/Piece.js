@@ -81,8 +81,9 @@ export class Pawn extends Piece {
         }
     }
 
-    copy() {
-        return new Pawn(this.board, this.square, this.color);
+    copy(board) {
+        let square = new Square(this.square.x, this.square.y);
+        return new Pawn(board, square, this.color);
     }
 }
 export class Knight extends Piece {
@@ -111,8 +112,9 @@ export class Knight extends Piece {
         }
     }
 
-    copy() {
-        return new Knight(this.board, this.square, this.color);
+    copy(board) {
+        let square = new Square(this.square.x, this.square.y);
+        return new Knight(board, square, this.color);
     }
 }
 export class Bishop extends Piece {
@@ -128,8 +130,9 @@ export class Bishop extends Piece {
         }
     }
 
-    copy() {
-        return new Bishop(this.board, this.square, this.color);
+    copy(board) {
+        let square = new Square(this.square.x, this.square.y);
+        return new Bishop(board, square, this.color);
     }
 }
 export class Rook extends Piece {
@@ -145,8 +148,9 @@ export class Rook extends Piece {
         }
     }
 
-    copy() {
-        return new Rook(this.board, this.square, this.color);
+    copy(board) {
+        let square = new Square(this.square.x, this.square.y);
+        return new Rook(board, square, this.color);
     }
 }
 export class Queen extends Piece {
@@ -165,8 +169,9 @@ export class Queen extends Piece {
         }
     }
 
-    copy() {
-        return new Queen(this.board, this.square, this.color);
+    copy(board) {
+        let square = new Square(this.square.x, this.square.y);
+        return new Queen(board, square, this.color);
     }
 }
 export class King extends Piece {
@@ -176,7 +181,7 @@ export class King extends Piece {
 
     get abbrev() { return this.isWhite ? "WK" : "BK" }
 
-    *getValidMoves(exemptKingCheck) {
+    *getValidMoves(checkKing = true) {
         var allMoves = [
             new Square(this.square.x + 1, this.square.y + 1),
             new Square(this.square.x + 1, this.square.y),
@@ -188,17 +193,18 @@ export class King extends Piece {
             new Square(this.square.x - 1, this.square.y - 1)
         ];
 
-        for (let move of allMoves) {
-            if (move.isValid && !this.board.hasFriendlyPiece(move, this.color)
-                && (exemptKingCheck || !this.board.anyCanMoveTo(move, opposite(this.color), true))) {
-                    //TODO: fix problem with this
-                yield new Move(this, move, true);
+        for (let square of allMoves) {
+            let move = new Move(this, square, true);
+            if (square.isValid && !this.board.hasFriendlyPiece(square, this.color)
+                && (!this.board.anyCanRetake(move, opposite(this.color), checkKing))) {
+                yield move;
             }
         }
     }
 
-    copy() {
-        return new King(this.board, this.square, this.color);
+    copy(board) {
+        let square = new Square(this.square.x, this.square.y);
+        return new King(board, square, this.color);
     }
 }
 
