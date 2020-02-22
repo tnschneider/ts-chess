@@ -1,8 +1,12 @@
 import Square from "./Square";
+import Color from "./Color";
+import Move from "./Move";
 
 export default class Board {
     constructor() {
         this.pieces = [];
+        this.turnColor = Color.white;
+        this.kingInCheck = false;
     }
 
     hasEnemyPiece(square, color) {
@@ -16,7 +20,7 @@ export default class Board {
     }
 
     anyCanRetake(move, color) {
-        let copyBoard = this.applyMove(move);
+        let copyBoard = this.applyMove(move, false);
 
         for (let piece of copyBoard.pieces.filter(x => x.color === color && x.name !== "king")) {
             for (let otherMove of piece.getValidMoves()) {
@@ -67,12 +71,13 @@ export default class Board {
 
     copy() {
         let board = new Board();
+        board.turnColor = this.turnColor;
         let pieces = this.pieces.map(x => x.copy(board));
         board.pieces = pieces;
         return board;
     }
 
-    applyMove(move) {
+    applyMove(move, lookForCheck) {
         var newBoard = this.copy();
         var piece = newBoard.getPieceAt(move.piece.square);
         var pieceToTake = newBoard.getPieceAt(move.square);
@@ -82,6 +87,15 @@ export default class Board {
         }
         piece.square.x = move.square.x;
         piece.square.y = move.square.y;
+        newBoard.turnColor = newBoard.turnColor.opposite;
+        if (lookForCheck) {
+            let king = this.pieces.find(x => x.name == "king" && x.color === this.turnColor);
+            if (this.anyCanRetake(new Move(king, king.square, true), this.turnColor.opposite)) {
+                this.kingInCheck = true;
+            } else {
+                this.kingInCheck = false;
+            }    
+        }
         return newBoard;
     }
 }

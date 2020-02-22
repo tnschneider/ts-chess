@@ -1,5 +1,5 @@
 import Square from "./Square";
-import { COLORS, opposite } from "./Color";
+import Color from "./Color";
 import Move from "./Move";
 
 function *range() {
@@ -17,12 +17,8 @@ export class Piece {
         this.isTaken = false;
     }
 
-    get sprite() {
-        return `${this.name}_${this.color}.png`.toLowerCase();
-    }
-
     get isWhite() {
-        return this.color === COLORS.WHITE;
+        return this.color === Color.white;
     }
 
     get isBlack() {
@@ -196,7 +192,7 @@ export class King extends Piece {
         for (let square of allMoves) {
             let move = new Move(this, square, true);
             if (square.isValid && !this.board.hasFriendlyPiece(square, this.color)
-                && (!this.board.anyCanRetake(move, opposite(this.color), checkKing))) {
+                && (!this.board.anyCanRetake(move, this.color.opposite, checkKing))) {
                 yield move;
             }
         }

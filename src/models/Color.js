@@ -1,10 +1,14 @@
-export const COLORS = {
-    WHITE: "WHITE",
-    BLACK: "BLACK"
-};
+export default class Color {
+    static white = new Color("white");
+    static black = new Color("black");
 
-export function opposite(color) {
-    return color === COLORS.WHITE
-        ? COLORS.BLACK
-        : COLORS.WHITE;
+    constructor(name) {
+        this.name = name;
+    }
+
+    get opposite() {
+        return this == Color.white
+            ? Color.black
+            : Color.white;
+    }
 }

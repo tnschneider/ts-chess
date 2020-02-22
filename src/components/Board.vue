@@ -92,7 +92,7 @@ export default {
     onPieceClicked(e) {
       let square = new Square(parseInt(e.target.dataset.x), parseInt(e.target.dataset.y));
       let piece = this.board.getPieceAt(square);
-      if (piece.color !== this.game.turnColor) return;
+      if (piece.color !== this.game.board.turnColor) return;
       this.highlightMovableSquares(piece);
     },
     onHaloClicked(e) {
